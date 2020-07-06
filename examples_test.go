@@ -291,21 +291,19 @@ func Example_handle_events() {
 		page02 := browser.PageFromTargetID(e.TargetInfo.TargetID)
 
 		// Log "hey" on each newly created page.
-		page02.Eval(`() => console.log("hey")`)
+		page02.Eval(`() => console.log("hello", "world")`)
 	})()
 
 	page01 := browser.Page("")
 
 	// Listen to all events of console output.
 	go page01.EachEvent(func(e *proto.RuntimeConsoleAPICalled) {
-		page01.ObjectsToJSON(e.Args).Join(" ")
+		log := page01.ObjectsToJSON(e.Args).Join(" ")
+		fmt.Println(log)
 	})()
 
-	// You subscribe to events before they occur. To start listening and
-	// consuming to the elements, you must run wait().
 	// Subscribe events before they happen, run the "wait()" to start consuming
-	// the events. We return an optional stop signal at the first event to halt
-	// the event subscription.
+	// the events. We can return an optional stop signal unsubscribe events.
 	wait := page01.EachEvent(func(e *proto.PageLoadEventFired) (stop bool) {
 		return true
 	})
@@ -320,10 +318,10 @@ func Example_handle_events() {
 		page01.WaitEvent(&proto.PageLoadEventFired{})()
 	}
 
-	fmt.Println("done")
+	kit.Sleep(1)
 
 	// Output:
-	// done
+	// hello world
 }
 
 // Example_hijack_requests shows how we can intercept requests and modify
